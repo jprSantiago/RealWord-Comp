@@ -28,7 +28,7 @@ app.use(
     err: Error | HttpException,
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction,
+    next: express.NextFunction
   ) => {
     // @ts-ignore
     if (err && err.name === 'UnauthorizedError') {
@@ -43,7 +43,7 @@ app.use(
     } else if (err) {
       res.status(500).json(err.message);
     }
-  },
+  }
 );
 
 export default app;
