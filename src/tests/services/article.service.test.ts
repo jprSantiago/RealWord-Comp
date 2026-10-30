@@ -25,7 +25,7 @@ describe('ArticleService', () => {
     test('should return the favorited article', async () => {
       // Given
       const slug = 'How-to-train-your-dragon';
-      
+
       const mockedUserResponse = {
         id: 123,
         username: 'RealWorld',
@@ -64,7 +64,7 @@ describe('ArticleService', () => {
 
       // Then
       await expect(favoriteArticle(slug, mockedUserResponse.id)).resolves.toHaveProperty(
-        'favoritesCount',
+        'favoritesCount'
       );
     });
 
@@ -72,7 +72,6 @@ describe('ArticleService', () => {
       // Given
       const id = 123;
       const slug = 'how-to-train-your-dragon';
-      
 
       // When
       prismaMock.user.findUnique.mockResolvedValue(null);
@@ -85,7 +84,7 @@ describe('ArticleService', () => {
     test('should return the unfavorited article', async () => {
       // Given
       const slug = 'How-to-train-your-dragon';
-      
+
       const mockedUserResponse = {
         id: 123,
         username: 'RealWorld',
@@ -122,7 +121,7 @@ describe('ArticleService', () => {
 
       // Then
       await expect(unfavoriteArticle(slug, mockedUserResponse.id)).resolves.toHaveProperty(
-        'favoritesCount',
+        'favoritesCount'
       );
     });
 
@@ -130,7 +129,7 @@ describe('ArticleService', () => {
       // Given
       const id = 123;
       const slug = 'how-to-train-your-dragon';
-      
+
       // When
       prismaMock.user.findUnique.mockResolvedValue(null);
 
