@@ -41,11 +41,11 @@ const main = async () => {
     const users = await Promise.all(Array.from({length: 12}, () => generateUser()));
     users?.map(user => user);
 
-    // eslint-disable-next-line no-restricted-syntax
+     
     for await (const user of users) {
       const articles = await Promise.all(Array.from({length: 12}, () => generateArticle(user.id)));
 
-      // eslint-disable-next-line no-restricted-syntax
+       
       for await (const article of articles) {
         await Promise.all(users.map(userItem => generateComment(userItem.id, article.slug)));
       }
