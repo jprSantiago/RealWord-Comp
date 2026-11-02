@@ -653,3 +653,33 @@ export const unfavoriteArticle = async (slugPayload: string, id: number) => {
 
   return result;
 };
+export function classificarArtigo(titulo: string, corpo: string, tags: string[]): string {
+  let pontos = 0;
+  const palavras = corpo.split(' ');
+  if (titulo.length > 50) {
+    pontos += 2;
+  } else if (titulo.length > 20) {
+    pontos += 1;
+  }
+  if (palavras.length > 500) {
+    pontos += 3;
+  } else if (palavras.length > 100) {
+    pontos += 2;
+  } else {
+    pontos -= 1;
+  }
+  for (const tag of tags) {
+    if (tag === 'devops') {
+      pontos += 2;
+    } else if (tag.length < 3) {
+      pontos -= 1;
+    }
+  }
+  if (pontos >= 6) {
+    return 'destaque';
+  }
+  if (pontos >= 3) {
+    return 'normal';
+  }
+  return 'baixo';
+}
