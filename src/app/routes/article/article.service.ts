@@ -653,4 +653,3 @@ export const unfavoriteArticle = async (slugPayload: string, id: number) => {
 
   return result;
 };
-
