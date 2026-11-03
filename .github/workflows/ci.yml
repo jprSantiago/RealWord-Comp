@@ -132,3 +132,36 @@ jobs:
           fi
           docker push --all-tags "$IMAGE"
           echo "image=$IMAGE:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+  deploy:
+    needs: build-push
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Aplica as migrations no banco de produção
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: npx prisma migrate deploy
+      - name: Dispara o deploy no Render
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          IMAGE: ${{ needs.build-push.outputs.image }}
+        run: |
+          ENCODED=$(jq -rn --arg v "$IMAGE" '$v|@uri')
+          curl -fsS -X POST "${HOOK}&imgURL=${ENCODED}"
+      - name: Smoke test
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "$APP_URL/api/tags" && exit 0
+            sleep 10
+          done
+          echo "A aplicação não respondeu em 5 minutos" && exit 1

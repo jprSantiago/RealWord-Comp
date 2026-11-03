@@ -1,0 +1,5 @@
+[extend]
+useDefault = true    
+[allowlist]
+description = "Senha fictícia usada só nos testes de integração"
+regexes = ['''senha-forte-123''']
