@@ -3,6 +3,7 @@
 API do Conduit (clone do Medium) em Node.js + Express + TypeScript + Prisma + PostgreSQL, baseada em gothinkster/node-express-realworld-example-app, com pipeline no GitHub Actions e deploy automático no Render.
 
 Produção: https://realworld-comp-api.onrender.com
+Link Do Vídeo: https://youtu.be/KVBzBfpTBA8
 
 ![CI/CD](https://github.com/jprSantiago/RealWord-Comp/actions/workflows/ci.yml/badge.svg)
 ![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=jprSantiago_RealWord-Comp)
