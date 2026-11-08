@@ -47,6 +47,15 @@ flowchart LR
     dep --> smoke[Smoke test /api/tags]
 ```
 
+| Etapa | Job              | Ferramenta                        | Por quê                                                                                                        |
+| ----- | ---------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 1     | `lint-test`      | ESLint, Prettier, Jest + Postgres | Pega erro de código primeiro, que é o mais barato. Cobertura mínima de 70%.                                    |
+| 2     | `secrets-scan`   | Gitleaks                          | Procura senhas e tokens em todo o histórico do Git.                                                            |
+| 3     | `quality`        | SonarCloud                        | Bugs, code smells e cobertura do código novo. O PR para se o Quality Gate reprovar.                            |
+| 4     | `container-scan` | Docker + Trivy                    | Gera a imagem e bloqueia CVEs HIGH/CRITICAL que já têm correção.                                               |
+| 5     | `build-push`     | ghcr.io                           | Publica a mesma imagem que o Trivy aprovou (tags `sha-`, `latest` e `vX.Y.Z`). Só em push na master ou em tag. |
+| 6     | `deploy`         | Prisma + Render                   | Aplica as migrations, dispara o deploy hook e faz o smoke test em `/api/tags`.                                 |
+
 ## Decisões de segurança
 
 - Segredos só em GitHub Secrets/Environments e no Render; Gitleaks varre a história inteira.
@@ -68,7 +77,15 @@ sonar.qualitygate.wait=true,
 
 ## Fluxo de branches
 
-GitHub Flow: branch → PR (etapas 1 a 4) → merge na main (1 a 6) → tag vX.Y.Z.
+GitHub Flow: branch → PR (etapas 1 a 4) → merge na master (1 a 6) → tag vX.Y.Z.
+
+## Problemas encontrados e como resolvi
+
+- **Prisma não carregava no Alpine:** a imagem subia, mas o engine do Prisma não era encontrado. Investiguei o nome do arquivo `.so` dentro do container e vi que o `ENV` estava `linuxmusl`, sem o hífen. Corrigi para `linux-musl-openssl-3.0.x` e adicionei o `openssl` com `apk add`.
+- **API não achava o banco no Docker:** dentro do container, `localhost` é o próprio container. Criei a rede `rw-net` e passei a chamar o banco pelo nome do container.
+- **Cobertura não aparecia:** o Nx não repassava as opções para o Jest e não gerava o `lcov.info` que o Sonar lê. Passei a rodar o Jest direto, com os reporters na linha de comando.
+- **33 erros de lint e conflito de versões:** migrei do ESLint 8 para a flat config do ESLint 9 e criei o `.npmrc` com `legacy-peer-deps` para o conflito do Nx. O `npm audit fix --force` quebrou versões, então desfiz e fiz as atualizações uma a uma.
+- **Push recusado na master:** a proteção de branch funcionou como deveria. Passei a trabalhar com branch + PR, e foi isso que garantiu que os 4 checks rodassem antes de cada merge.
 
 ## Limitações e melhorias futuras
 
